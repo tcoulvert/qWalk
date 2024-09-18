@@ -7,6 +7,8 @@ from pathlib import Path
 import awkward as ak
 import numpy as np
 
+from plotting import plot_time_binned_array
+
 CURRENT_TIME = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 # Put initial pulse in with some noise (for now, 0) term for other input.
@@ -85,7 +87,7 @@ def store(pump_array, detector_array, feedback_array, output_dirpath):
 
     if not os.path.exists(output_dirpath):
         os.makedirs(output_dirpath)
-    filename = f"{CURRENT_TIME}_QRandWalk"
+    filename = "QRandWalk"
     with open(os.path.join(output_dirpath, filename), 'w') as f:
         json.dump(output_dict_for_json, f)
 
@@ -134,6 +136,13 @@ def main(n_steps, output_dirpath):
         pump_array, detector_array, feedback_array,
         output_dirpath
     )
+    plot_feedback_dirpath = os.path.join(output_dirpath, 'plots', 'feedback')
+    plot_detector_dirpath = os.path.join(output_dirpath, 'plots', 'detector')
+    for i in range(len(feedback_array)):
+        # print(f"feedback_array[{i}]: \n{feedback_array[i]}\n{'-'*60}")
+        # print(f"detector_array[{i}]: \n{detector_array[i]}\n{'-'*60}")
+        plot_time_binned_array(feedback_array[i], plot_feedback_dirpath, f"feedback_step{i}")
+        plot_time_binned_array(detector_array[i], plot_detector_dirpath, f"detector_step{i}")
 
 
 if __name__ == '__main__':
@@ -143,9 +152,9 @@ if __name__ == '__main__':
     parser.add_argument('--n-steps', dest='n_steps', action='store', default=15,
         help='The number of steps to iterate the simulation.'
     )
-    parser.add_argument('--dump', dest='output_dir_path', action='store', default=f'{str(Path().absolute())}/../output_sim',
+    parser.add_argument('--dump', dest='output_dir_path', action='store', default=f'{str(Path().absolute())}/../output_sim/{CURRENT_TIME}',
         help='Name of the output path in which the processed parquets will be stored.'
     )
     args = parser.parse_args()
 
-    main(args.n_steps, args.output_dir_path)
+    main(int(args.n_steps), args.output_dir_path)
