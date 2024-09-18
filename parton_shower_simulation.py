@@ -43,8 +43,8 @@ def input_pump(step):
     
 def switch1_scheduler(step):
     ## TO BE USED LATER WHEN ACTUALLY MODELLING PARTON SHOWER ##
-    # return np.pi/4
-    return np.pi/2 * RNG.integers(1)
+    return np.pi/4
+    # return np.pi/2 * RNG.integers(1)
 
 def compute_transfer_matrix(theta, phi_R=0, phi_T=0):
     ## This method will become important once we start doing the actual parton shower simulation
@@ -82,9 +82,9 @@ def align_early_late(early_c, late_d):
 
 def store(pump_array, detector_array, feedback_array, output_dirpath):
     output_dict_for_json = {
-        'pump_array': {f'step_{step+1}': pump_array[step].tolist() for step in range(len(pump_array))},
-        'feedback_array': {f'step_{step}': feedback_array[step].tolist() for step in range(len(feedback_array))},
-        'detector_array': {f'step_{step}': detector_array[step].tolist() for step in range(len(detector_array))},
+        'pump_array': {f"step_{step}": pump_array[step].tolist() for step in range(len(pump_array))},
+        'feedback_array': {f"step_{step}": feedback_array[step].tolist() for step in range(len(feedback_array))},
+        'detector_array': {f"step_{step}": detector_array[step].tolist() for step in range(len(detector_array))},
     }
 
     if not os.path.exists(output_dirpath):
@@ -112,7 +112,7 @@ def main(n_steps, output_dirpath):
         pump_array.append(input_pump(step))
 
         early_c, late_d = np.zeros(step), np.zeros(step)
-        for pulse, (pulse_a, pulse_b) in enumerate(zip(pump_array[-1], feedback_array[-1])):
+        for pulse, (pulse_a, pulse_b) in enumerate(zip(feedback_array[-1], pump_array[-1])):
         #     print(f"pulse_a = {pulse_a}")
         #     print(f"pulse_b = {pulse_b}")
             early_c[pulse], late_d[pulse] = optical_switch1(pulse_a, pulse_b, step)
@@ -122,6 +122,8 @@ def main(n_steps, output_dirpath):
         early_c, late_d = align_early_late(early_c, late_d)
         # print(f"rectified_c = {early_c}")
         # print(f"rectified_d = {late_d}")
+
+        ## ADD PHASE SHIFT HERE ##
 
         feedback_array.append(np.zeros(step+1))
         detector_array.append(np.zeros(step+1))
