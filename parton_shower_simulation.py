@@ -10,6 +10,7 @@ import numpy as np
 from plotting import plot_time_binned_array
 
 CURRENT_TIME = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+RNG = np.random.default_rng(seed=None)
 
 # Put initial pulse in with some noise (for now, 0) term for other input.
 # This gets split into two pulses based on transfer matrix, and theres
@@ -42,7 +43,8 @@ def input_pump(step):
     
 def switch1_scheduler(step):
     ## TO BE USED LATER WHEN ACTUALLY MODELLING PARTON SHOWER ##
-    return np.pi/4
+    # return np.pi/4
+    return np.pi/2 * RNG.integers(1)
 
 def compute_transfer_matrix(theta, phi_R=0, phi_T=0):
     ## This method will become important once we start doing the actual parton shower simulation
@@ -152,9 +154,9 @@ if __name__ == '__main__':
     parser.add_argument('--n-steps', dest='n_steps', action='store', default=15,
         help='The number of steps to iterate the simulation.'
     )
-    parser.add_argument('--dump', dest='output_dir_path', action='store', default=f'{str(Path().absolute())}/../output_sim/{CURRENT_TIME}',
+    parser.add_argument('--dump', dest='output_dir_path', action='store', default=f'{str(Path().absolute())}/../output_sim/',
         help='Name of the output path in which the processed parquets will be stored.'
     )
     args = parser.parse_args()
 
-    main(int(args.n_steps), args.output_dir_path)
+    main(int(args.n_steps), os.path.join(args.output_dir_path, CURRENT_TIME))
